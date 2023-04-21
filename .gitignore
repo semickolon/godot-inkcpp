@@ -3,17 +3,14 @@
 *.tmp
 
 # Ink files
-inkcpp_cl/*.ink
 *.json
 
 # Visual Studio code
 *.code-workspace
-
-# Doxygen
-Documentation/*
+.vscode/
 
 # Output
-Build/*
-build/*
 bin/
-Bin/
+*.o
+*.obj
+.sconsign.dblite
