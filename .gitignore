@@ -9,6 +9,9 @@
 *.code-workspace
 .vscode/
 
+# Nix
+.direnv/
+
 # Output
 bin/
 *.o
