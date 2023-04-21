@@ -1,13 +1,25 @@
+#!/usr/bin/env python
 import os
 
-env = Environment(
-    ENV = os.environ,
-    CPPPATH = ['inkcpp/include', 'inkcpp_compiler/include', 'shared/private', 'shared/public'],
-    CPPDEFINES = ['INK_COMPILER']
-)
+libname = "libinkcpp"
 
-src = Glob("src/*.cpp")
-src.extend(Glob("inkcpp_compiler/*.cpp"))
-src.extend(Glob("inkcpp/*.cpp"))
+env = SConscript("godot-cpp/SConstruct")
 
-env.Program("bin/compiler", src)
+env.Append(ENV=os.environ)
+env.Append(CPPPATH=["inkcpp/include", "shared/private", "shared/public"])
+
+sources = Glob("src/*.cpp") + Glob("inkcpp/*.cpp")
+
+if env["platform"] == "macos":
+    platlibname = "{}.{}.{}".format(libname, env["platform"], env["target"])
+    library = env.SharedLibrary(
+        "bin/{}.framework/{}".format(platlibname, platlibname),
+        source=sources,
+    )
+else:
+    library = env.SharedLibrary(
+        "bin/{}{}{}".format(libname, env["suffix"], env["SHLIBSUFFIX"]),
+        source=sources,
+    )
+
+Default(library)

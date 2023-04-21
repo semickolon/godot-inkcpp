@@ -1,0 +1,7 @@
+[configuration]
+
+entry_symbol = "inkcpp_library_init"
+
+[libraries]
+
+linux.x86_64.debug = "res://addons/inkcpp/linux/libinkcpp.linux.template_debug.x86_64.so"

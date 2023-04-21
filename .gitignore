@@ -12,5 +12,6 @@
 # Output
 bin/
 *.o
+*.os
 *.obj
 .sconsign.dblite
