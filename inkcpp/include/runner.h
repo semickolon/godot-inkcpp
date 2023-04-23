@@ -193,6 +193,12 @@ namespace ink::runtime
 		}
 #endif
 
+		void bind_callable(String name, Callable callable)
+		{
+			hash_t h = ink::hash_string(name.ascii().get_data());
+			internal_bind(h, new internal::function_array_callable(callable));
+		}
+
 #pragma endregion 
 
 #pragma region Convenience Methods

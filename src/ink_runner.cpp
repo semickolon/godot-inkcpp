@@ -111,9 +111,7 @@ bool InkRunner::move_to_path(String path) {
 }
 
 void InkRunner::bind_external_function(String ink_func_name, Callable fn) {
-	// TODO: Unimplemented
-	// const char *name = ink_func_name.ascii().get_data();
-	// _runner->bind(name, [&fn]() { fn.call(); });
+	_runner->bind_callable(ink_func_name, fn);
 }
 
 void InkRunner::_bind_methods() {
@@ -130,6 +128,7 @@ void InkRunner::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("choose_choice_index", "idx"), &InkRunner::choose_choice_index);
 	ClassDB::bind_method(D_METHOD("move_to_path", "path"), &InkRunner::move_to_path);
 	ClassDB::bind_method(D_METHOD("bind_external_function", "ink_func_name", "fn"), &InkRunner::bind_external_function);
+	// TODO: get_tags_at_path
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "ink_story"), "set_ink_story", "get_ink_story");
 }

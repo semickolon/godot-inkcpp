@@ -8,6 +8,11 @@
 #include "InkVar.h"
 #endif
 
+#include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
+
+using namespace godot;
+
 namespace ink::runtime::internal
 {
 	template<>
@@ -97,4 +102,85 @@ namespace ink::runtime::internal
 		}
 	}
 #endif
+
+	template<>
+	Variant function_base::pop<Variant>(basic_eval_stack* stack)
+	{
+		value v = stack->pop();
+
+		switch (v.type())
+		{
+		case value_type::null:
+			break;
+		case value_type::divert:
+			UtilityFunctions::printerr("InkCPP: Cannot use divert as external function return value");
+			break;
+		case value_type::int32:
+			return Variant(v.get<value_type::int32>());
+		case value_type::float32:
+			return Variant(v.get<value_type::float32>());
+		case value_type::boolean:
+			return Variant(v.get<value_type::boolean>());
+		case value_type::string:
+			return Variant(v.get<value_type::string>());
+		}
+
+		return Variant();
+	}
+
+	template<>
+	void function_base::push<Variant>(basic_eval_stack* stack, const Variant& v)
+	{
+		switch (v.get_type())
+		{
+		case Variant::Type::NIL:
+			stack->push(value{});
+			break;
+		case Variant::Type::INT:
+			stack->push(internal::value{}.set<value_type::int32>(static_cast<int32_t>(v)));
+			break;
+		case Variant::Type::FLOAT:
+			stack->push(internal::value{}.set<value_type::float32>(static_cast<float_t>(v)));
+			break;
+		case Variant::Type::BOOL:
+			stack->push(internal::value{}.set<value_type::boolean>(static_cast<bool>(v)));
+			break;
+		case Variant::Type::STRING:
+		case Variant::Type::STRING_NAME:
+			UtilityFunctions::printerr("InkCPP: Direct conversion of strings from Godot to Ink is not supported. Use `allocate` and `push_string` instead.");
+			return;
+		}
+	}
+
+	void function_array_callable::call(basic_eval_stack* stack, size_t length, string_table& strings)
+	{
+		Array args;
+		
+		for (size_t i = 0; i < length; i++) {
+			args.append(pop<Variant>(stack));
+		}
+
+		Variant result = _callable.callv(args);
+		Variant::Type result_type = result.get_type();
+
+		if (result_type == Variant::Type::STRING ||
+			result_type == Variant::Type::STRING_NAME)
+		{
+			CharString cs = static_cast<String>(result).ascii();
+			int len = cs.length();
+			const char *src = cs.get_data();
+			char* buffer = allocate(strings, len + 1);
+			
+			// Copy
+			char* ptr = buffer;
+			while (*src != '\0')
+				*(ptr++) = *(src++);
+			*ptr = 0;
+
+			// push string result
+			push_string(stack, buffer);
+		} else {
+			push(stack, result);
+		}
+	}
 }

@@ -3,6 +3,10 @@
 #include "traits.h"
 #include "system.h"
 
+#include <godot_cpp/classes/ref.hpp>
+
+using namespace godot;
+
 namespace ink::runtime::internal
 {
 	class basic_eval_stack;
@@ -140,4 +144,15 @@ namespace ink::runtime::internal
 		D invocableDelegate;
 	};
 #endif
+
+	class function_array_callable : public function_base
+	{
+	public:
+		function_array_callable(Callable callable) : _callable(callable) { }
+
+		void call(basic_eval_stack* stack, size_t length, string_table& strings) override;
+		
+	private:
+		Callable _callable;
+	};
 }
