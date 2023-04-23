@@ -1,6 +1,7 @@
 #include "register_types.h"
 
 #include "ink_story.h"
+#include "ink_runner.h"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
@@ -14,6 +15,7 @@ void initialize_inkcpp_types(ModuleInitializationLevel p_level) {
 		return;
 	}
 	ClassDB::register_class<InkStory>();
+	ClassDB::register_class<InkRunner>();
 }
 
 void uninitialize_inkcpp_types(ModuleInitializationLevel p_level) {
