@@ -165,8 +165,7 @@ namespace ink::runtime::internal
 		Variant result = _callable.callv(args);
 		Variant::Type result_type = result.get_type();
 
-		if (result_type == Variant::Type::STRING ||
-			result_type == Variant::Type::STRING_NAME)
+		if (result_type == Variant::Type::STRING)
 		{
 			CharString cs = static_cast<String>(result).ascii();
 			int len = cs.length();
@@ -181,7 +180,23 @@ namespace ink::runtime::internal
 
 			// push string result
 			push_string(stack, buffer);
-		} else {
+		}
+		else if (result_type == Variant::Type::STRING_NAME)
+		{
+			PackedByteArray bytes = static_cast<StringName>(result).to_ascii_buffer();
+			int len = bytes.size();
+			char* buffer = allocate(strings, len + 1);
+
+			// Copy
+			for (int i = 0; i < len; ++i) {
+				buffer[i] = bytes.decode_u8(i);
+			}
+
+			// push string result
+			push_string(stack, buffer);
+		}
+		else
+		{
 			push(stack, result);
 		}
 	}
