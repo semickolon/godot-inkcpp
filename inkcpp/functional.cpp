@@ -8,10 +8,12 @@
 #include "InkVar.h"
 #endif
 
+#ifdef INK_ENABLE_GODOT
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace godot;
+#endif
 
 namespace ink::runtime::internal
 {
@@ -102,7 +104,7 @@ namespace ink::runtime::internal
 		}
 	}
 #endif
-
+#ifdef INK_ENABLE_GODOT
 	template<>
 	Variant function_base::pop<Variant>(basic_eval_stack* stack)
 	{
@@ -183,4 +185,5 @@ namespace ink::runtime::internal
 			push(stack, result);
 		}
 	}
+#endif
 }

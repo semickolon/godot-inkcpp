@@ -7,6 +7,7 @@ env = SConscript("godot-cpp/SConstruct")
 
 env.Append(ENV=os.environ)
 env.Append(CPPPATH=["inkcpp/include", "shared/private", "shared/public"])
+env.Append(CPPDEFINES=["INK_ENABLE_GODOT"])
 
 sources = Glob("src/*.cpp") + Glob("inkcpp/*.cpp")
 

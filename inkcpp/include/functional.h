@@ -3,9 +3,11 @@
 #include "traits.h"
 #include "system.h"
 
+#ifdef INK_ENABLE_GODOT
 #include <godot_cpp/classes/ref.hpp>
 
 using namespace godot;
+#endif
 
 namespace ink::runtime::internal
 {
@@ -145,6 +147,7 @@ namespace ink::runtime::internal
 	};
 #endif
 
+#ifdef INK_ENABLE_GODOT
 	class function_array_callable : public function_base
 	{
 	public:
@@ -155,4 +158,5 @@ namespace ink::runtime::internal
 	private:
 		Callable _callable;
 	};
+#endif
 }

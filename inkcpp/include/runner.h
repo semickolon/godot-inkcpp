@@ -193,11 +193,13 @@ namespace ink::runtime
 		}
 #endif
 
+#ifdef INK_ENABLE_GODOT
 		void bind_callable(String name, Callable callable)
 		{
 			hash_t h = ink::hash_string(name.ascii().get_data());
 			internal_bind(h, new internal::function_array_callable(callable));
 		}
+#endif
 
 #pragma endregion 
 
