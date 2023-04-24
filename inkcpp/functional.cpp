@@ -139,13 +139,13 @@ namespace ink::runtime::internal
 			stack->push(value{});
 			break;
 		case Variant::Type::INT:
-			stack->push(internal::value{}.set<value_type::int32>(static_cast<int32_t>(v)));
+			stack->push(value{}.set<value_type::int32>(static_cast<int32_t>(v)));
 			break;
 		case Variant::Type::FLOAT:
-			stack->push(internal::value{}.set<value_type::float32>(static_cast<float_t>(v)));
+			stack->push(value{}.set<value_type::float32>(static_cast<float_t>(v)));
 			break;
 		case Variant::Type::BOOL:
-			stack->push(internal::value{}.set<value_type::boolean>(static_cast<bool>(v)));
+			stack->push(value{}.set<value_type::boolean>(static_cast<bool>(v)));
 			break;
 		case Variant::Type::STRING:
 		case Variant::Type::STRING_NAME:
@@ -159,7 +159,7 @@ namespace ink::runtime::internal
 		Array args;
 		
 		for (size_t i = 0; i < length; i++) {
-			args.append(pop<Variant>(stack));
+			args.push_front(pop<Variant>(stack));
 		}
 
 		Variant result = _callable.callv(args);
