@@ -17,7 +17,7 @@ void InkRunner::_clear() {
 	ink_story = Ref<InkStory>();
 	// TODO: dispose previous runner?
     _runner = ink::runtime::runner(); 
-    _globalTags = Array();
+    _global_tags = Array();
     _text = "";
     _tags = Array();
 }
@@ -32,6 +32,11 @@ Array InkRunner::_get_tags(ink::runtime::runner runner) {
 	return tags;
 }
 
+ink::hash_t InkRunner::_hash(String path) {
+	const char *p = path.ascii().get_data();
+	return ink::hash_string(p);
+}
+
 void InkRunner::set_ink_story(Ref<InkStory> ink_story) {
 	_clear();
 	
@@ -42,12 +47,7 @@ void InkRunner::set_ink_story(Ref<InkStory> ink_story) {
 
 	this->ink_story = ink_story;
 	_runner = ink_story->_create_runner();
-
-	// Get global tags with an ephemeral runner
-	ink::runtime::runner temp_runner = ink_story->_create_runner();
-	temp_runner->getline();
-	_globalTags = _get_tags(temp_runner);
-	// TODO: Can we dispose temp_runner?
+	_global_tags = get_tags_at_path("");
 }
 
 Ref<InkStory> InkRunner::get_ink_story() {
@@ -94,7 +94,7 @@ Array InkRunner::get_tags() {
 }
 
 Array InkRunner::get_global_tags() {
-	return _globalTags;
+	return _global_tags;
 }
 
 void InkRunner::choose_choice_index(int idx) {
@@ -106,12 +106,25 @@ void InkRunner::choose_choice_index(int idx) {
 }
 
 bool InkRunner::move_to_path(String path) {
-	const char *p = path.ascii().get_data();
-	return _runner->move_to(ink::hash_string(p));
+	return _runner->move_to(_hash(path));
 }
 
 void InkRunner::bind_external_function(String ink_func_name, Callable fn) {
 	_runner->bind_callable(ink_func_name, fn);
+}
+
+Array InkRunner::get_tags_at_path(String path) {
+	// TODO: Can we dispose temp_runner?
+	ink::runtime::runner temp_runner = ink_story->_create_runner();
+
+	// If path.is_empty(), we're not moving to a different path and so we get the global tags
+	if (temp_runner->move_to(_hash(path)) || path.is_empty()) {
+		temp_runner->getline();
+		return _get_tags(temp_runner);
+	} else {
+		UtilityFunctions::printerr("InkCPP: Attempted to get tags at path '" + path + "' but not found. Returning empty array.");
+		return Array();
+	}
 }
 
 void InkRunner::_bind_methods() {
@@ -128,7 +141,7 @@ void InkRunner::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("choose_choice_index", "idx"), &InkRunner::choose_choice_index);
 	ClassDB::bind_method(D_METHOD("move_to_path", "path"), &InkRunner::move_to_path);
 	ClassDB::bind_method(D_METHOD("bind_external_function", "ink_func_name", "fn"), &InkRunner::bind_external_function);
-	// TODO: get_tags_at_path
+	ClassDB::bind_method(D_METHOD("get_tags_at_path", "path"), &InkRunner::get_tags_at_path);
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "ink_story"), "set_ink_story", "get_ink_story");
 }

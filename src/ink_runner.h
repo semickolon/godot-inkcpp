@@ -16,12 +16,13 @@ class InkRunner : public RefCounted {
 
 private:
     ink::runtime::runner _runner;
-    Array _globalTags;
+    Array _global_tags;
     String _text;
     Array _tags;
 
     void _clear();
     static Array _get_tags(ink::runtime::runner runner);
+    ink::hash_t _hash(String path);
 
 protected:
     static void _bind_methods();
@@ -45,6 +46,7 @@ public:
     void choose_choice_index(int index);
     bool move_to_path(String path);
     void bind_external_function(String ink_func_name, Callable fn);
+    Array get_tags_at_path(String path);
 
 };
 
