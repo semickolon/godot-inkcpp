@@ -58,9 +58,15 @@ String InkRunner::advance() {
 	if (can_continue()) {
 		_text = String(_runner->getline().c_str());
 		_tags = _get_tags(_runner);
+
+		emit_signal("ink_advanced", _text, _tags);
+		if (has_choices()) {
+			emit_signal("ink_choices_set", get_choices());
+		}
+
 		return _text;
 	} else if (!_runner->has_choices()) {
-		// TODO: ended, emit signal
+		emit_signal("ink_ended");
 	}
 
 	return "";
@@ -144,4 +150,8 @@ void InkRunner::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_tags_at_path", "path"), &InkRunner::get_tags_at_path);
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "ink_story"), "set_ink_story", "get_ink_story");
+
+	ADD_SIGNAL(MethodInfo("ink_advanced", PropertyInfo(Variant::STRING, "text"), PropertyInfo(Variant::ARRAY, "tags")));
+	ADD_SIGNAL(MethodInfo("ink_choices_set", PropertyInfo(Variant::ARRAY, "choices")));
+	ADD_SIGNAL(MethodInfo("ink_ended"));
 }
