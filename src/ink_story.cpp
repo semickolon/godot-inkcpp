@@ -24,8 +24,13 @@ Error InkStory::load_from_file(Ref<FileAccess> file) {
 
 	try {
 		uint64_t file_len = file->get_length();
-		PackedByteArray file_buf = file->get_buffer(file_len);
-		unsigned char *file_data = reinterpret_cast<unsigned char *>(file_buf.ptrw());
+		unsigned char *file_data = new unsigned char[file_len];
+
+		while (file->get_position() < file_len) {
+			uint64_t file_pos = file->get_position();
+			file_data[file_pos] = file->get_8();
+		}
+
 		_story = ink::runtime::story::from_binary(file_data, file_len, true);
 	} catch (const std::exception& e) {
 		UtilityFunctions::printerr("InkCPP: Unhandled ink runtime exception: " + String(e.what()));
