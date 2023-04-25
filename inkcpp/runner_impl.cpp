@@ -162,7 +162,12 @@ namespace ink::runtime::internal
 
 	void runner_impl::clear_tags()
 	{
-		_tags.clear();
+		_tags->clear();
+	}
+
+	void runner_impl::swap_tags()
+	{
+		_tags = _tags == &_tags_a ? &_tags_b : &_tags_a;
 	}
 
 	void runner_impl::jump(ip_t dest, bool record_visits)
@@ -328,6 +333,7 @@ namespace ink::runtime::internal
 	{
 		_ptr = _story->instructions();
 		bEvaluationMode = false;
+		_tags = &_tags_a;
 
 		// register with globals
 		_globals->add_runner(this);
@@ -357,7 +363,9 @@ namespace ink::runtime::internal
 	{
 		std::string result{""};
 		bool fill = false;
+
 		clear_tags();
+		swap_tags();
 		
 		do {
 			if (fill) {
@@ -370,6 +378,20 @@ namespace ink::runtime::internal
 			_output >> part;
 			result += part;
 			fill = _output.last_char() == ' ';
+
+			if (fill) {
+				tag_array* tag_dest = _tags == &_tags_a ? &_tags_b : &_tags_a;
+
+				for (int i = 0; i < _tags->size(); ++i) {
+					tag_dest->push() = (*_tags)[i];
+				}
+
+				clear_tags();
+				swap_tags();
+			} else {
+				// TODO: For this to work properly, confirm assumption that `save()` is always invoked
+				swap_tags();
+			}
 		} while(_ptr != nullptr && _output.last_char() != '\n');
 
 		// TODO: fallback choice = no choice
@@ -503,7 +525,8 @@ namespace ink::runtime::internal
 		jump(_story->instructions() + c.path(), false);
 		if(!_container.empty()){ _globals->visit(_container.top()); }
 		clear_choices();
-		clear_tags();
+		_tags_a.clear();
+		_tags_b.clear();
 	}
 
 	void runner_impl::getline_silent()
@@ -515,18 +538,18 @@ namespace ink::runtime::internal
 
 	bool runner_impl::has_tags() const
 	{
-		return _tags.size() > 0;
+		return _tags->size() > 0;
 	}
 
 	size_t runner_impl::num_tags() const
 	{
-		return _tags.size();
+		return _tags->size();
 	}
 
 	const char* runner_impl::get_tag(size_t index) const
 	{
-		inkAssert(index < _tags.size(), "Tag index exceeds _num_tags");
-		return _tags[index];
+		inkAssert(index < _tags->size(), "Tag index exceeds _num_tags");
+		return (*_tags)[index];
 	}
 
 #ifdef INK_ENABLE_CSTD
@@ -617,7 +640,7 @@ namespace ink::runtime::internal
 			if (_output.ends_with(value_type::newline))
 			{
 				// TODO: REMOVE
-				return true;
+				// return true;
 
 				// Unless we are out of content, we are going to try
 				//  to continue a little further. This is to check for
@@ -627,6 +650,9 @@ namespace ink::runtime::internal
 				{
 					// Save a snapshot of the current runtime state so we
 					//  can return here if we end up hitting a new line
+					if (!_saved) {
+						swap_tags();
+					}
 					forget();
 					save();
 				}
@@ -1128,7 +1154,7 @@ namespace ink::runtime::internal
 			} break;
 			case Command::TAG:
 			{
-				_tags.push() = read<const char*>();
+				_tags->push() = read<const char*>();
 			} break;
 			default:
 				inkAssert(false, "Unrecognized command!");

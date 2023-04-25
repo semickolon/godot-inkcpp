@@ -130,6 +130,7 @@ namespace ink::runtime::internal
 		void clear_choices();
 
 		void clear_tags();
+		void swap_tags();
 
 		// Special code for jumping from the current IP to another
 		void jump(ip_t, bool record_visits = true);
@@ -237,7 +238,10 @@ namespace ink::runtime::internal
 		size_t _backup_choice_len;
 
 		// Tag list
-		managed_array<const char*, config::limitActiveTags < 0, abs(config::limitActiveTags)> _tags;
+		typedef managed_array<const char*, config::limitActiveTags < 0, abs(config::limitActiveTags)> tag_array;
+		tag_array _tags_a;
+		tag_array _tags_b;
+		tag_array* _tags;
 
 		// TODO: Move to story? Both?
 		functions _functions;
