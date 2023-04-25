@@ -146,49 +146,6 @@ namespace ink
 				return result;
 			}
 #endif
-#ifdef INK_ENABLE_UNREAL
-			FString basic_stream::get()
-			{
-				size_t start = find_start();
-
-				// TODO: Slow! FString concatonation.
-				//  Is there really no equivilent of stringstream in Unreal? Some kind of String Builder?
-
-				// Move up from marker
-				bool hasGlue = false;
-				FString str;
-				for (size_t i = start; i < _size; i++)
-				{
-					if (should_skip(i, hasGlue))
-						continue;
-
-					switch (_data[i].type)
-					{
-					case value_type::int32:
-						str += FString::Printf(TEXT("%d"), _data[i].integer_value);
-						break;
-					case value_type::float32:
-						// TODO: Whitespace cleaning
-						str += FString::Printf(TEXT("%f"), _data[i].float_value);
-						break;
-					case value_type::string:
-						str += _data[i].string_val;
-						break;
-					case data_type::newline:
-						str += "\n";
-						break;
-					default:
-						break;
-					}
-				}
-
-				// Reset stream size to where we last held the marker
-				_size = start;
-
-				// Return processed string
-				return str;
-			}
-#endif
 
 			int basic_stream::queued() const
 			{
@@ -488,13 +445,6 @@ namespace ink
 			}
 
 			basic_stream& operator>>(basic_stream& in, std::string& out)
-			{
-				out = in.get();
-				return in;
-			}
-#endif
-#ifdef INK_ENABLE_UNREAL
-			basic_stream& operator>>(basic_stream& in, FString& out)
 			{
 				out = in.get();
 				return in;

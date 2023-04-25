@@ -77,10 +77,6 @@ namespace ink::runtime::internal
 		// get all into stream
 		virtual void getall(std::ostream&) override;
 #endif
-#ifdef INK_ENABLE_UNREAL
-		// Reads a line into an Unreal FString
-		virtual FString getline() override;
-#endif
 #pragma endregion
 	protected:
 		// bind external

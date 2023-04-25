@@ -80,9 +80,6 @@ namespace ink::runtime::internal
 #ifdef INK_ENABLE_STL
 	MARK_AS_STRING(std::string, x.size(), x.c_str());
 #endif
-#ifdef INK_ENABLE_UNREAL
-	MARK_AS_STRING(FString, x.Len(), TCHAR_TO_UTF8(*x));
-#endif
 
 #undef MARK_AS_STRING
 

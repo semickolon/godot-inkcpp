@@ -53,12 +53,6 @@ namespace ink
 #ifdef INK_ENABLE_STL
 				// Extract into a string
 				std::string get();
-#else
-				// will conflict with stl definition
-#	ifdef INK_ENABLE_UNREAL
-				// Extract into a string
-				FString get();
-#	endif
 #endif
 
 				// Check if the stream is empty
@@ -125,9 +119,6 @@ namespace ink
 #ifdef INK_ENABLE_STL
 			std::ostream& operator <<(std::ostream&, basic_stream&);
 			basic_stream& operator >>(basic_stream&, std::string&);
-#endif
-#ifdef INK_ENABLE_UNREAL
-			basic_stream& operator >>(basic_stream&, FString&);
 #endif
 
 			template<size_t N>

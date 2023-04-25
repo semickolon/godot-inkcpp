@@ -4,10 +4,6 @@
 #include "system.h"
 #include "functional.h"
 
-#ifdef INK_ENABLE_UNREAL
-#include "Containers/UnrealString.h"
-#endif
-
 namespace ink::runtime
 {
 	class choice;
@@ -105,18 +101,6 @@ namespace ink::runtime
 		virtual void getall(std::ostream&) = 0;
 #endif
 
-#ifdef INK_ENABLE_UNREAL
-		/**
-		 * Gets the next line of output using unreal string allocation
-		 *
-		 * Continue execution until the next newline, then return the output as
-		 * an Unreal FString. Requires INK_ENABLE_UNREAL
-		 *
-		 * @return FString with the next line of output
-		*/
-		virtual FString getline() = 0;
-#endif
-
 		/**
 		 * Choice iterator.
 		 * 
@@ -184,14 +168,6 @@ namespace ink::runtime
 		{
 			bind(ink::hash_string(name), function);
 		}
-
-#ifdef INK_ENABLE_UNREAL
-		template<typename D>
-		void bind_delegate(hash_t name, D functionDelegate)
-		{
-			internal_bind(name, new internal::function_array_delegate(functionDelegate));
-		}
-#endif
 
 #ifdef INK_ENABLE_GODOT
 		void bind_callable(String name, Callable callable)

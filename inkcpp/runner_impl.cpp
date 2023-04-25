@@ -452,22 +452,6 @@ namespace ink::runtime::internal
 	}
 
 #endif
-#ifdef INK_ENABLE_UNREAL
-	FString runner_impl::getline()
-	{
-		inkAssert(false, "Fix (see getline for std)");
-		// Advance interpreter one line
-		advance_line();
-
-		// Read line into std::string
-		FString result;
-		_output >> result;
-
-		// Return result
-		inkAssert(_output.is_empty(), "Output should be empty after getline!");
-		return result;
-	}
-#endif
 
 	void runner_impl::advance_line()
 	{

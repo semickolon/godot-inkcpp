@@ -11,6 +11,3 @@
 #include <string.h>
 #include <stdlib.h>
 #endif
-#ifdef INK_ENABLE_UNREAL
-#include "Containers/UnrealString.h"
-#endif
