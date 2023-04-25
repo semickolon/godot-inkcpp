@@ -24,6 +24,7 @@ public:
     ~InkStory();
 
     Error load_from_file(Ref<FileAccess> file);
+    bool is_file_loaded();
 
     ink::runtime::runner _create_runner();
 };

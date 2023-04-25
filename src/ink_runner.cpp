@@ -5,6 +5,8 @@
 
 #include <godot_cpp/variant/utility_functions.hpp>
 
+#define CHECK_RUNNER(ret) if (!_runner.is_valid()) { UtilityFunctions::printerr("InkCPP: Invalid internal runner in InkRunner. Is `ink_story` properly set?"); return ret; }
+
 InkRunner::InkRunner() {
 	_clear();
 }
@@ -55,6 +57,8 @@ Ref<InkStory> InkRunner::get_ink_story() {
 }
 
 String InkRunner::advance() {
+	CHECK_RUNNER("");
+
 	if (can_continue()) {
 		_text = String(_runner->getline().c_str());
 		_tags = _get_tags(_runner);
@@ -73,15 +77,18 @@ String InkRunner::advance() {
 }
 
 bool InkRunner::can_continue() {
+	CHECK_RUNNER(false);
 	return _runner->can_continue();
 }
 
 bool InkRunner::has_choices() {
+	CHECK_RUNNER(false);
 	return _runner->has_choices();
 }
 
 Array InkRunner::get_choices() {
 	Array choices = Array();
+	CHECK_RUNNER(choices);
 
 	for (int i = 0; i < _runner->num_choices(); ++i) {
 		const ink::runtime::choice *ch = _runner->get_choice(i);
@@ -104,6 +111,8 @@ Array InkRunner::get_global_tags() {
 }
 
 void InkRunner::choose_choice_index(int idx) {
+	CHECK_RUNNER();
+
 	if (idx >= 0 && idx < _runner->num_choices()) {
 		_runner->choose(idx);
 	} else {
@@ -112,14 +121,17 @@ void InkRunner::choose_choice_index(int idx) {
 }
 
 bool InkRunner::move_to_path(String path) {
+	CHECK_RUNNER(false);
 	return _runner->move_to(_hash(path));
 }
 
 void InkRunner::bind_external_function(String ink_func_name, Callable fn) {
+	CHECK_RUNNER();
 	_runner->bind_callable(ink_func_name, fn);
 }
 
 Array InkRunner::get_tags_at_path(String path) {
+	CHECK_RUNNER(Array());
 	// TODO: Can we dispose temp_runner?
 	ink::runtime::runner temp_runner = ink_story->_create_runner();
 

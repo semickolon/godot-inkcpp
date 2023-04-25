@@ -16,10 +16,16 @@ InkStory::~InkStory() {
 void InkStory::_clear_story() {
 	if (_story != nullptr) {
 		delete _story;
+		_story = nullptr;
 	}
 }
 
 Error InkStory::load_from_file(Ref<FileAccess> file) {
+	if (!file.is_valid()) {
+		UtilityFunctions::printerr("InkCPP: Attempted to load null file to InkStory.");
+		return Error::ERR_FILE_NOT_FOUND;
+	}
+
 	_clear_story();
 
 	try {
@@ -40,6 +46,10 @@ Error InkStory::load_from_file(Ref<FileAccess> file) {
 	return Error::OK;
 }
 
+bool InkStory::is_file_loaded() {
+	return _story != nullptr;
+}
+
 ink::runtime::runner InkStory::_create_runner() {
 	if (_story == nullptr) {
 		UtilityFunctions::printerr("InkCPP: Attempted to create runner but story has not been loaded yet. Creating null runner instead.");
@@ -50,4 +60,5 @@ ink::runtime::runner InkStory::_create_runner() {
 
 void InkStory::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("load_from_file", "file"), &InkStory::load_from_file);
+	ClassDB::bind_method(D_METHOD("is_file_loaded"), &InkStory::is_file_loaded);
 }
