@@ -357,6 +357,8 @@ namespace ink::runtime::internal
 	{
 		std::string result{""};
 		bool fill = false;
+		clear_tags();
+		
 		do {
 			if (fill) {
 				result += " ";
@@ -381,6 +383,8 @@ namespace ink::runtime::internal
 	void runner_impl::getline(std::ostream& out)
 	{
 		bool fill = false;
+		clear_tags();
+		
 		do {
 			if (fill) { out << " "; }
 			// Advance interpreter one line
@@ -613,7 +617,7 @@ namespace ink::runtime::internal
 			if (_output.ends_with(value_type::newline))
 			{
 				// TODO: REMOVE
-				// return true;
+				return true;
 
 				// Unless we are out of content, we are going to try
 				//  to continue a little further. This is to check for
