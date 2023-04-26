@@ -55,28 +55,14 @@ namespace ink::runtime::internal
 		virtual size_t num_tags() const override;
 		virtual const char* get_tag(size_t index) const override;
 
-
-#ifdef INK_ENABLE_CSTD
-		// c-style getline
-		virtual char* getline_alloc() override;
-#endif
-
 		// move to path
 		virtual bool move_to(hash_t path) override;
 
 #ifdef INK_ENABLE_STL
 		// Gets a single line of output and stores it in a C++ std::string
 		virtual std::string getline() override;
-
-		// Reads a line into a std::ostream
-		virtual void getline(std::ostream&) override;
-
-		// get all into string
-		virtual std::string getall() override;
-
-		// get all into stream
-		virtual void getall(std::ostream&) override;
 #endif
+
 #pragma endregion
 	protected:
 		// bind external
@@ -266,8 +252,4 @@ namespace ink::runtime::internal
 
 	template<>
 	inline const char* runner_impl::read();
-
-#ifdef INK_ENABLE_STL
-	std::ostream& operator<<(std::ostream&, runner_impl&);
-#endif
 }

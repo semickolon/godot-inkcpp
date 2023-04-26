@@ -402,55 +402,6 @@ namespace ink::runtime::internal
 		return result;
 	}
 
-	void runner_impl::getline(std::ostream& out)
-	{
-		bool fill = false;
-		clear_tags();
-		
-		do {
-			if (fill) { out << " "; }
-			// Advance interpreter one line
-			advance_line();
-			// Write into out
-			out << _output;
-			fill = _output.last_char() == ' ';
-		} while(_ptr != nullptr && _output.last_char() != '\n');
-
-		// TODO: fallback choice = no choice
-		if(!has_choices() && _fallback_choice) { choose(~0); }
-
-		// Make sure we read everything
-		inkAssert(_output.is_empty(), "Output should be empty after getline!");
-	}
-
-	std::string runner_impl::getall()
-	{
-		// Advance interpreter until we're stopped
-		std::stringstream str;
-		while(can_continue()) {
-			getline(str);
-		}
-
-		// Read output into std::string
-
-		// Return result
-		inkAssert(_output.is_empty(), "Output should be empty after getall!");
-		return str.str();
-	}
-
-	void runner_impl::getall(std::ostream& out)
-	{
-		// Advance interpreter until we're stopped
-		while (can_continue())
-			advance_line();
-
-		// Send output into stream
-		out << _output;
-
-		// Return result
-		inkAssert(_output.is_empty(), "Output should be empty after getall!");
-	}
-
 #endif
 
 	void runner_impl::advance_line()
@@ -534,15 +485,6 @@ namespace ink::runtime::internal
 	{
 		inkAssert(index < _tags->size(), "Tag index exceeds _num_tags");
 		return (*_tags)[index];
-	}
-
-#ifdef INK_ENABLE_CSTD
-	char* runner_impl::getline_alloc()
-	{
-		// TODO
-		return nullptr;
-
-#endif
 	}
 
 	bool runner_impl::move_to(hash_t path)
@@ -1278,12 +1220,4 @@ namespace ink::runtime::internal
 
 		_saved = false;
 	}
-
-#ifdef INK_ENABLE_STL
-	std::ostream& operator<<(std::ostream& out, runner_impl& in)
-	{
-		in.getline(out);
-		return out;
-	}
-#endif
 }
