@@ -5,28 +5,19 @@
 
 #include <godot_cpp/variant/utility_functions.hpp>
 
-InkStory::InkStory() {
-	_story = nullptr;
-}
+InkStory::InkStory() {}
 
 InkStory::~InkStory() {
-	_clear_story();
+	delete _story;
 }
 
-void InkStory::_clear_story() {
-	if (_story != nullptr) {
-		delete _story;
-		_story = nullptr;
-	}
-}
+Ref<InkStory> InkStory::open(Ref<FileAccess> file) {
+	auto ink_story = Ref<InkStory>();
 
-Error InkStory::load_from_file(Ref<FileAccess> file) {
 	if (!file.is_valid()) {
 		UtilityFunctions::printerr("InkCPP: Attempted to load null file to InkStory.");
-		return Error::ERR_FILE_NOT_FOUND;
+		return ink_story;
 	}
-
-	_clear_story();
 
 	try {
 		uint64_t file_len = file->get_length();
@@ -37,28 +28,19 @@ Error InkStory::load_from_file(Ref<FileAccess> file) {
 			file_data[file_pos] = file->get_8();
 		}
 
-		_story = ink::runtime::story::from_binary(file_data, file_len, true);
+		ink_story.instantiate();
+		ink_story->_story = ink::runtime::story::from_binary(file_data, file_len, true);
 	} catch (const std::exception& e) {
 		UtilityFunctions::printerr("InkCPP: Unhandled ink runtime exception: " + String(e.what()));
-		return Error::FAILED;
 	}
 
-	return Error::OK;
+	return ink_story;
 }
 
-bool InkStory::is_file_loaded() {
-	return _story != nullptr;
-}
-
-ink::runtime::runner InkStory::_create_runner() {
-	if (_story == nullptr) {
-		UtilityFunctions::printerr("InkCPP: Attempted to create runner but story has not been loaded yet. Creating null runner instead.");
-		return ink::runtime::runner();
-	}
+ink::runtime::runner InkStory::create_runner() {
 	return _story->new_runner();
 }
 
 void InkStory::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("load_from_file", "file"), &InkStory::load_from_file);
-	ClassDB::bind_method(D_METHOD("is_file_loaded"), &InkStory::is_file_loaded);
+	ClassDB::bind_static_method("InkStory", D_METHOD("open", "file"), &InkStory::open);
 }

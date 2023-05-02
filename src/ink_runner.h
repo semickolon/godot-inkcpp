@@ -15,11 +15,14 @@ class InkRunner : public RefCounted {
 	GDCLASS(InkRunner, RefCounted)
 
 private:
+    Ref<InkStory> _ink_story;
     ink::runtime::runner _runner;
     Array _global_tags;
     String _text;
     Array _tags;
+    bool _force_ended;
 
+    void _initialize(Ref<InkStory> _ink_story);
     void _clear();
     static Array _get_tags(ink::runtime::runner runner);
     ink::hash_t _hash(String path);
@@ -28,12 +31,12 @@ protected:
     static void _bind_methods();
 
 public:
-    Ref<InkStory> ink_story;
-
     InkRunner();
+    InkRunner(ink::runtime::runner runner);
     ~InkRunner();
 
-    void set_ink_story(Ref<InkStory> value);
+    static Ref<InkRunner> from_ink_story(Ref<InkStory> ink_story);
+
     Ref<InkStory> get_ink_story();
 
     String advance();

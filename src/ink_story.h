@@ -14,8 +14,6 @@ class InkStory : public RefCounted {
 private:
     ink::runtime::story *_story;
 
-    void _clear_story();
-
 protected:
     static void _bind_methods();
 
@@ -23,10 +21,9 @@ public:
     InkStory();
     ~InkStory();
 
-    Error load_from_file(Ref<FileAccess> file);
-    bool is_file_loaded();
+    static Ref<InkStory> open(Ref<FileAccess> file);
 
-    ink::runtime::runner _create_runner();
+    ink::runtime::runner create_runner();
 };
 
 #endif // INK_STORY_H

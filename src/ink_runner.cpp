@@ -5,23 +5,36 @@
 
 #include <godot_cpp/variant/utility_functions.hpp>
 
-#define CHECK_RUNNER(ret) if (!_runner.is_valid()) { UtilityFunctions::printerr("InkCPP: Invalid internal runner in InkRunner. Is `ink_story` properly set?"); return ret; }
-
 InkRunner::InkRunner() {
+	_force_ended = false;
 	_clear();
 }
 
-InkRunner::~InkRunner() {
-	// TODO: How to dispose internal runner?
+void InkRunner::_initialize(Ref<InkStory> ink_story) {
+	_ink_story = ink_story;
+	_runner = ink_story->create_runner();
+	_global_tags = get_tags_at_path("");
+}
+
+InkRunner::~InkRunner() {}
+
+Ref<InkRunner> InkRunner::from_ink_story(Ref<InkStory> ink_story) {
+	auto ink_runner = Ref<InkRunner>();
+
+	if (!ink_story.is_valid()) {
+		UtilityFunctions::printerr("InkCPP: Attempted to create InkRunner from InkStory but the latter is invalid. Returning null.");
+		return ink_runner;
+	}
+
+	ink_runner.instantiate();
+	ink_runner->_initialize(ink_story);
+	return ink_runner;
 }
 
 void InkRunner::_clear() {
-	ink_story = Ref<InkStory>();
-	// TODO: dispose previous runner?
-    _runner = ink::runtime::runner(); 
-    _global_tags = Array();
-    _text = "";
-    _tags = Array();
+	_text = "";
+	_tags = Array();
+	_global_tags = Array();
 }
 
 Array InkRunner::_get_tags(ink::runtime::runner runner) {
@@ -39,26 +52,11 @@ ink::hash_t InkRunner::_hash(String path) {
 	return ink::hash_string(p);
 }
 
-void InkRunner::set_ink_story(Ref<InkStory> ink_story) {
-	_clear();
-	
-	if (!ink_story.is_valid()) {
-		UtilityFunctions::print("InkCPP: Attempted to assign invalid InkStory to InkRunner.");
-		return;
-	}
-
-	this->ink_story = ink_story;
-	_runner = ink_story->_create_runner();
-	_global_tags = get_tags_at_path("");
-}
-
 Ref<InkStory> InkRunner::get_ink_story() {
-	return ink_story;
+	return _ink_story;
 }
 
 String InkRunner::advance() {
-	CHECK_RUNNER("");
-
 	if (can_continue()) {
 		_text = String(_runner->getline().c_str());
 		_tags = _get_tags(_runner);
@@ -77,18 +75,18 @@ String InkRunner::advance() {
 }
 
 bool InkRunner::can_continue() {
-	CHECK_RUNNER(false);
-	return _runner->can_continue();
+	return _runner->can_continue() && !_force_ended;
 }
 
 bool InkRunner::has_choices() {
-	CHECK_RUNNER(false);
-	return _runner->has_choices();
+	return _runner->has_choices() && !_force_ended;
 }
 
 Array InkRunner::get_choices() {
 	Array choices = Array();
-	CHECK_RUNNER(choices);
+
+	if (_force_ended)
+		return choices;
 
 	for (int i = 0; i < _runner->num_choices(); ++i) {
 		const ink::runtime::choice *ch = _runner->get_choice(i);
@@ -111,7 +109,8 @@ Array InkRunner::get_global_tags() {
 }
 
 void InkRunner::choose_choice_index(int idx) {
-	CHECK_RUNNER();
+	if (_force_ended)
+		return;
 
 	if (idx >= 0 && idx < _runner->num_choices()) {
 		_runner->choose(idx);
@@ -121,19 +120,20 @@ void InkRunner::choose_choice_index(int idx) {
 }
 
 bool InkRunner::move_to_path(String path) {
-	CHECK_RUNNER(false);
+	if (_force_ended)
+		return false;
 	return _runner->move_to(_hash(path));
 }
 
 void InkRunner::bind_external_function(String ink_func_name, Callable fn) {
-	CHECK_RUNNER();
+	if (_force_ended)
+		return;
 	_runner->bind_callable(ink_func_name, fn);
 }
 
 Array InkRunner::get_tags_at_path(String path) {
-	CHECK_RUNNER(Array());
 	// TODO: Can we dispose temp_runner?
-	ink::runtime::runner temp_runner = ink_story->_create_runner();
+	ink::runtime::runner temp_runner = _ink_story->create_runner();
 
 	// If path.is_empty(), we're not moving to a different path and so we get the global tags
 	if (temp_runner->move_to(_hash(path)) || path.is_empty()) {
@@ -146,16 +146,15 @@ Array InkRunner::get_tags_at_path(String path) {
 }
 
 void InkRunner::force_end() {
-	if (ink_story.is_valid() && _runner.is_valid()) {
-		emit_signal("ink_ended");
-		_clear();
-	}
+	_force_ended = true;
+	_clear();
+	emit_signal("ink_ended");
 }
 
 void InkRunner::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_ink_story", "ink_story"), &InkRunner::set_ink_story);
-	ClassDB::bind_method(D_METHOD("get_ink_story"), &InkRunner::get_ink_story);
+	ClassDB::bind_static_method("InkRunner", D_METHOD("from_ink_story", "ink_story"), &InkRunner::from_ink_story);
 
+	ClassDB::bind_method(D_METHOD("get_ink_story"), &InkRunner::get_ink_story);
 	ClassDB::bind_method(D_METHOD("advance"), &InkRunner::advance);
 	ClassDB::bind_method(D_METHOD("can_continue"), &InkRunner::can_continue);
 	ClassDB::bind_method(D_METHOD("has_choices"), &InkRunner::has_choices);
@@ -168,8 +167,6 @@ void InkRunner::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("bind_external_function", "ink_func_name", "fn"), &InkRunner::bind_external_function);
 	ClassDB::bind_method(D_METHOD("get_tags_at_path", "path"), &InkRunner::get_tags_at_path);
 	ClassDB::bind_method(D_METHOD("force_end"), &InkRunner::force_end);
-
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "ink_story"), "set_ink_story", "get_ink_story");
 
 	ADD_SIGNAL(MethodInfo("ink_advanced", PropertyInfo(Variant::STRING, "text"), PropertyInfo(Variant::ARRAY, "tags")));
 	ADD_SIGNAL(MethodInfo("ink_choices_set", PropertyInfo(Variant::ARRAY, "choices")));
