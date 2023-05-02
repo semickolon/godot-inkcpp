@@ -47,6 +47,7 @@ public:
     bool move_to_path(String path);
     void bind_external_function(String ink_func_name, Callable fn);
     Array get_tags_at_path(String path);
+    void force_end();
 
 };
 

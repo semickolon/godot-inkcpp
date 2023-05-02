@@ -145,6 +145,13 @@ Array InkRunner::get_tags_at_path(String path) {
 	}
 }
 
+void InkRunner::force_end() {
+	if (ink_story.is_valid() && _runner.is_valid()) {
+		emit_signal("ink_ended");
+		_clear();
+	}
+}
+
 void InkRunner::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_ink_story", "ink_story"), &InkRunner::set_ink_story);
 	ClassDB::bind_method(D_METHOD("get_ink_story"), &InkRunner::get_ink_story);
@@ -160,6 +167,7 @@ void InkRunner::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("move_to_path", "path"), &InkRunner::move_to_path);
 	ClassDB::bind_method(D_METHOD("bind_external_function", "ink_func_name", "fn"), &InkRunner::bind_external_function);
 	ClassDB::bind_method(D_METHOD("get_tags_at_path", "path"), &InkRunner::get_tags_at_path);
+	ClassDB::bind_method(D_METHOD("force_end"), &InkRunner::force_end);
 
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "ink_story"), "set_ink_story", "get_ink_story");
 
