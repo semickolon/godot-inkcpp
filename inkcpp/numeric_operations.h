@@ -392,7 +392,7 @@ namespace ink::runtime::internal {
 		using operation_base::operation_base;
 		void operator()(basic_eval_stack& stack, value* vals) {
 			int min = casting::numeric_cast<value_type::int32>(vals[0]);
-			int max = casting::numeric_cast<value_type::int32>(vals[0]);
+			int max = casting::numeric_cast<value_type::int32>(vals[1]);
 			stack.push(value{}.set<value_type::int32>(_prng.rand(max - min + 1) + min));
 		}
 	};
