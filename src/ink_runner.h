@@ -22,7 +22,7 @@ private:
     Array _tags;
     bool _force_ended;
 
-    void _initialize(Ref<InkStory> _ink_story);
+    void _initialize(Ref<InkStory> _ink_story, ink::runtime::runner runner);
     void _clear();
     static Array _get_tags(ink::runtime::runner runner);
     ink::hash_t _hash(String path);
@@ -32,10 +32,9 @@ protected:
 
 public:
     InkRunner();
-    InkRunner(ink::runtime::runner runner);
     ~InkRunner();
 
-    static Ref<InkRunner> from_ink_story(Ref<InkStory> ink_story);
+    static Ref<InkRunner> from_ink_story(Ref<InkStory> ink_story, bool new_globals);
 
     Ref<InkStory> get_ink_story();
 

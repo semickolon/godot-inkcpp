@@ -13,6 +13,7 @@ class InkStory : public RefCounted {
 
 private:
     ink::runtime::story *_story;
+    ink::runtime::globals _globals;
 
 protected:
     static void _bind_methods();
@@ -23,7 +24,7 @@ public:
 
     static Ref<InkStory> open(Ref<FileAccess> file);
 
-    ink::runtime::runner create_runner();
+    ink::runtime::runner create_runner(bool new_globals);
 };
 
 #endif // INK_STORY_H

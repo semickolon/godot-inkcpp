@@ -10,15 +10,15 @@ InkRunner::InkRunner() {
 	_clear();
 }
 
-void InkRunner::_initialize(Ref<InkStory> ink_story) {
+InkRunner::~InkRunner() {}
+
+void InkRunner::_initialize(Ref<InkStory> ink_story, ink::runtime::runner runner) {
 	_ink_story = ink_story;
-	_runner = ink_story->create_runner();
+	_runner = runner;
 	_global_tags = get_tags_at_path("");
 }
 
-InkRunner::~InkRunner() {}
-
-Ref<InkRunner> InkRunner::from_ink_story(Ref<InkStory> ink_story) {
+Ref<InkRunner> InkRunner::from_ink_story(Ref<InkStory> ink_story, bool new_globals) {
 	auto ink_runner = Ref<InkRunner>();
 
 	if (!ink_story.is_valid()) {
@@ -26,8 +26,9 @@ Ref<InkRunner> InkRunner::from_ink_story(Ref<InkStory> ink_story) {
 		return ink_runner;
 	}
 
+	auto runner = ink_story->create_runner(new_globals);
 	ink_runner.instantiate();
-	ink_runner->_initialize(ink_story);
+	ink_runner->_initialize(ink_story, runner);
 	return ink_runner;
 }
 
@@ -133,7 +134,7 @@ void InkRunner::bind_external_function(String ink_func_name, Callable fn) {
 
 Array InkRunner::get_tags_at_path(String path) {
 	// TODO: Can we dispose temp_runner?
-	ink::runtime::runner temp_runner = _ink_story->create_runner();
+	ink::runtime::runner temp_runner = _ink_story->create_runner(true);
 
 	// If path.is_empty(), we're not moving to a different path and so we get the global tags
 	if (temp_runner->move_to(_hash(path)) || path.is_empty()) {
@@ -152,7 +153,7 @@ void InkRunner::force_end() {
 }
 
 void InkRunner::_bind_methods() {
-	ClassDB::bind_static_method("InkRunner", D_METHOD("from_ink_story", "ink_story"), &InkRunner::from_ink_story);
+	ClassDB::bind_static_method("InkRunner", D_METHOD("from_ink_story", "ink_story", "new_globals"), &InkRunner::from_ink_story);
 
 	ClassDB::bind_method(D_METHOD("get_ink_story"), &InkRunner::get_ink_story);
 	ClassDB::bind_method(D_METHOD("advance"), &InkRunner::advance);

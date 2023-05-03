@@ -37,8 +37,15 @@ Ref<InkStory> InkStory::open(Ref<FileAccess> file) {
 	return ink_story;
 }
 
-ink::runtime::runner InkStory::create_runner() {
-	return _story->new_runner();
+ink::runtime::runner InkStory::create_runner(bool new_globals) {
+	if (new_globals) {
+		return _story->new_runner();
+	} else {
+		if (_globals == nullptr) {
+			_globals = _story->new_globals();
+		}
+		return _story->new_runner(_globals);
+	}
 }
 
 void InkStory::_bind_methods() {
