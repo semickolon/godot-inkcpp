@@ -2,7 +2,6 @@
 
 #include "value.h"
 #include "platform.h"
-#include "snapshot_impl.h"
 
 namespace ink
 {
@@ -12,7 +11,7 @@ namespace ink
 		{
 			class string_table;
 			class list_table;
-			class basic_stream : public snapshot_interface
+			class basic_stream
 			{
 			protected:
 				basic_stream(value*, size_t);
@@ -93,10 +92,6 @@ namespace ink
 				}
 
 				bool saved() const { return _save != ~0; }
-
-				// snapshot interface
-				size_t snap(unsigned char* data, const snapper&) const override;
-				const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 			private:
 				size_t find_start() const;

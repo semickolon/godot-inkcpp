@@ -2,7 +2,6 @@
 
 #include "system.h"
 #include "array.h"
-#include "snapshot_impl.h"
 
 #ifdef INK_ENABLE_STL
 #include <iosfwd>
@@ -25,7 +24,7 @@ namespace ink::runtime::internal
 	}
 
 	/// managed all list entries and list metadata
-	class list_table : public snapshot_interface 
+	class list_table
 	{
 		using data_t = int;
 		enum class state : char {
@@ -77,10 +76,6 @@ namespace ink::runtime::internal
 		 * @return pointer to end of insierted string
 		 */
 		char* toString(char* out, const list& l) const;
-
-		// snapshot interface implementation
-		size_t snap(unsigned char* data, const snapper&) const override;
-		const unsigned char* snap_load(const unsigned char* data, const loader&) override;
 
 		/** special traitment when a list get assignet again
 		 * when a list get assigned and would have no origin, it gets the origin of the base with origin

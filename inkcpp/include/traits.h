@@ -9,13 +9,6 @@
 
 namespace ink::runtime::internal
 {
-	template<typename ... Ts>
-	constexpr size_t sizeof_largest_type() 
-	{
-		size_t ret = 0;
-		return ( (ret = sizeof(Ts) > ret ? sizeof(Ts) : ret), ... );
-	}
-
 	template<unsigned int N, typename Arg, typename... Args>
 	struct get_ith_type : get_ith_type<N - 1, Args...> {};
 
@@ -43,12 +36,6 @@ namespace ink::runtime::internal
 
 	template<class T>
 	struct is_same<T, T> : true_type {};
-
-	template<typename T>
-	struct is_pointer : false_type {};
-
-	template<typename T>
-	struct is_pointer<T*> : true_type {};
 
 	// == string testing (from me) ==
 
