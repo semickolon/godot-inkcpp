@@ -2,6 +2,8 @@
 
 #include "../shared/public/system.h"
 
+#define INITIAL_SEED 1337
+
 namespace ink::runtime::internal {
 	/**
 	 * @brief pseudo random number generator based on Linear Congruential Generator.
@@ -12,6 +14,7 @@ namespace ink::runtime::internal {
 		static constexpr uint32_t M = 1<<31;
 	public:
 		void srand(int32_t seed) {
+			_seed = seed;
 			_x = seed;
 		}
 		uint32_t rand() {
@@ -23,7 +26,11 @@ namespace ink::runtime::internal {
 			prod *= max;
 			return static_cast<int32_t>(prod / M);
 		}
+		uint32_t seed() {
+			return _seed;
+		}
 	private:
-		uint32_t _x = 1337;
+		uint32_t _x = INITIAL_SEED;
+		uint32_t _seed = INITIAL_SEED;
 	};
 }

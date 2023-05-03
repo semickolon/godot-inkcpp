@@ -6,6 +6,8 @@
 #include "header.h"
 #include "string_utils.h"
 
+#include <godot_cpp/variant/utility_functions.hpp>
+
 namespace ink::runtime
 {
 	const choice* runner_interface::get_choice(size_t index) const
@@ -1053,14 +1055,32 @@ namespace ink::runtime::internal
 			} break;
 			case Command::SEQUENCE:
 			{
-				// TODO: The C# ink runtime does a bunch of fancy logic
-				//  to make sure each element is picked at least once in every
-				//  iteration loop. I don't feel like replicating that right now.
-				// So, let's just return a random number and *shrug*
 				int sequenceLength = _eval.pop().get<value_type::int32>();
 				int index = _eval.pop().get<value_type::int32>();
+				int loopIndex = index / sequenceLength;
+				int iterIndex = index % sequenceLength;
 
-				_eval.push(value{}.set<value_type::int32>(_rng.rand(sequenceLength)));
+				container_t container = _container.top();
+				int32_t seed = container + loopIndex + _rng.seed();
+
+				prng seqrng{};
+				seqrng.srand(seed);
+
+				uint64_t x = (1 << sequenceLength) - 1;
+				int choiceIndex = -1;
+
+				for (int i = 0; i <= iterIndex; i++) {
+					uint64_t x1;
+					// TODO: Implementation could be better
+					do {
+						choiceIndex = seqrng.rand(sequenceLength);
+						x1 = x ^ (1 << choiceIndex);
+					} while (x1 >= x);
+
+					x = x1;
+				}
+
+				_eval.push(value{}.set<value_type::int32>(choiceIndex));
 			} break;
 			case Command::SEED:
 			{
